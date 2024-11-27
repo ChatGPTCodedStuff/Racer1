@@ -27,6 +27,12 @@
     let keys = {};
     let score = 0;
 
+    // Obstacles
+    const obstacles = [];
+    const obstacleWidth = 50;
+    const obstacleHeight = 100;
+    let obstacleSpeed = 2;
+
     // Handle keyboard input
     window.addEventListener('keydown', (e) => {
       keys[e.code] = true;
@@ -36,7 +42,13 @@
       keys[e.code] = false;
     });
 
-    // Draw player car and score
+    // Function to create new obstacles at random positions
+    function createObstacle() {
+      const obstacleX = Math.random() * (canvas.width - obstacleWidth);
+      obstacles.push({ x: obstacleX, y: -obstacleHeight });
+    }
+
+    // Function to draw the game elements (player, obstacles, and score)
     function drawGame() {
       // Draw the player's car
       ctx.fillStyle = '#ff0000';  // Car color
@@ -50,10 +62,17 @@
       // Draw road (simple line)
       ctx.fillStyle = '#777';
       ctx.fillRect(canvas.width / 2 - 5, 0, 10, canvas.height);  // Middle line of road
+
+      // Draw obstacles
+      ctx.fillStyle = '#0000FF'; // Obstacle color
+      obstacles.forEach(obstacle => {
+        ctx.fillRect(obstacle.x, obstacle.y, obstacleWidth, obstacleHeight);
+      });
     }
 
-    // Update the game state
+    // Function to update the game state (player movement, obstacles)
     function updateGame() {
+      // Move the player
       if (keys['ArrowLeft'] && playerX > 0) {
         playerX -= playerSpeed; // Move left
       }
@@ -61,8 +80,30 @@
         playerX += playerSpeed; // Move right
       }
 
-      // Update the score (you can add a real game mechanic here)
-      score++;
+      // Update obstacles
+      obstacles.forEach(obstacle => {
+        obstacle.y += obstacleSpeed; // Move obstacles down
+      });
+
+      // Check for collision with obstacles
+      for (let i = 0; i < obstacles.length; i++) {
+        const obstacle = obstacles[i];
+        // If obstacle is off screen, reset it
+        if (obstacle.y > canvas.height) {
+          obstacles.splice(i, 1);
+          createObstacle(); // Add a new obstacle
+          score++; // Increase score
+        } else if (
+          obstacle.x < playerX + playerWidth &&
+          obstacle.x + obstacleWidth > playerX &&
+          obstacle.y < playerY + playerHeight &&
+          obstacle.y + obstacleHeight > playerY
+        ) {
+          // Collision detected, end the game
+          alert('Game Over! Your score: ' + score);
+          resetGame();
+        }
+      }
 
       // Clear the screen before drawing
       ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -74,8 +115,20 @@
       requestAnimationFrame(updateGame);
     }
 
-    // Start the game loop
-    updateGame();
+    // Function to reset the game
+    function resetGame() {
+      playerX = canvas.width / 2 - playerWidth / 2;
+      playerY = canvas.height - playerHeight - 20;
+      score = 0;
+      obstacles.length = 0;  // Clear obstacles
+      obstacleSpeed = 2;
+      createObstacle(); // Start with one obstacle
+      updateGame(); // Restart the game loop
+    }
+
+    // Start the game
+    createObstacle(); // Create the first obstacle
+    updateGame(); // Start the game loop
   </script>
 </body>
 </html>
