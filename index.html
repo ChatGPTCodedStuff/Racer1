@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Racing Game</title>
+  <style>
+    body { margin: 0; padding: 0; overflow: hidden; }
+    canvas { display: block; background: #eee; }
+  </style>
+</head>
+<body>
+  <canvas id="gameCanvas"></canvas>
+  <script>
+    // Set up the canvas
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    // Game Variables
+    const playerWidth = 50;
+    const playerHeight = 100;
+    let playerX = canvas.width / 2 - playerWidth / 2;
+    let playerY = canvas.height - playerHeight - 20;
+    let playerSpeed = 5;
+    let keys = {};
+    let score = 0;
+
+    // Handle keyboard input
+    window.addEventListener('keydown', (e) => {
+      keys[e.code] = true;
+    });
+
+    window.addEventListener('keyup', (e) => {
+      keys[e.code] = false;
+    });
+
+    // Draw player car and score
+    function drawGame() {
+      // Draw the player's car
+      ctx.fillStyle = '#ff0000';  // Car color
+      ctx.fillRect(playerX, playerY, playerWidth, playerHeight);
+
+      // Draw the score
+      ctx.fillStyle = '#000'; // Text color
+      ctx.font = '30px Arial';
+      ctx.fillText(`Score: ${score}`, 20, 40);  // Display score at the top-left
+
+      // Draw road (simple line)
+      ctx.fillStyle = '#777';
+      ctx.fillRect(canvas.width / 2 - 5, 0, 10, canvas.height);  // Middle line of road
+    }
+
+    // Update the game state
+    function updateGame() {
+      if (keys['ArrowLeft'] && playerX > 0) {
+        playerX -= playerSpeed; // Move left
+      }
+      if (keys['ArrowRight'] && playerX < canvas.width - playerWidth) {
+        playerX += playerSpeed; // Move right
+      }
+
+      // Update the score (you can add a real game mechanic here)
+      score++;
+
+      // Clear the screen before drawing
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Draw the updated game state
+      drawGame();
+
+      // Call game loop again
+      requestAnimationFrame(updateGame);
+    }
+
+    // Start the game loop
+    updateGame();
+  </script>
+</body>
+</html>
